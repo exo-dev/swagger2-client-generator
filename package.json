@@ -1,0 +1,46 @@
+{
+  "name": "swagger2-client-generator",
+  "version": "0.0.0",
+  "description": "",
+  "keywords": [],
+  "main": "./index.js",
+  "devDependencies": {
+    "gulp": "^3.8.5",
+    "boilerplate-gulp": "^0.2.1",
+    "bower": "^1.3.8"
+  },
+  "directories": {
+    "build": "./build",
+    "dist": "./dist",
+    "reports": "./reports",
+    "dev": "./dev",
+    "example": "./example"
+  },
+  "author": {
+    "name": "Federico Gonzalez",
+    "email": "federicogonzalez761@gmail.com"
+  },
+  "scripts": {
+    "prepublish": "node ./node_modules/bower/bin/bower install && node ./node_modules/gulp/bin/gulp.js",
+    "test": "node ./node_modules/gulp/bin/gulp.js test",
+    "dev": "node ./node_modules/gulp/bin/gulp.js dev",
+    "dist": "node ./node_modules/gulp/bin/gulp.js"
+  },
+  "licenses": [
+    {
+      "type": "Apache License 2.0",
+      "url": "https://github.com/exo-sa/swagger2-client-generator/blob/master/LICENSE.md"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/exo-sa/swagger2-client-generator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/exo-sa/swagger2-client-generator/issues"
+  },
+  "homepage": "https://github.com/exo-sa/swagger2-client-generator",
+  "dependencies": {
+    "swagger-validate": "^0.1.1"
+  }
+}
