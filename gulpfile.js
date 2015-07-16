@@ -5,6 +5,6 @@ boilerplate(gulp, {
   pkg: require('./package.json'),
   jsMain: './src/createClient.js',
   karmaConfig: require('./dev/karmaConfig'),
-  jsHintConfig: require('./dev/jsHintConfig'),
+  jsHintConfig: './dev/.jshintrc',
   disableCss: true
 });
