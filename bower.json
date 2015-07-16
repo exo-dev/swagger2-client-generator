@@ -1,0 +1,39 @@
+{
+  "name": "swagger2-client-generator",
+  "version": "0.0.0",
+  "description": "Automatically generate an api object from a given swagger v2.0 schema",
+  "keywords": [
+    "swagger",
+    "api",
+    "generator"
+  ],
+  "main": [
+    "dist/swagger2-client-generator.js"
+  ],
+  "homepage": "https://github.com/exo-sa/swagger2-client-generator",
+  "authors": [
+    "Federico Gonzalez <federicogonzalez761@gmail.com>"
+  ],
+  "moduleType": [
+    "amd",
+    "node",
+    "globals"
+  ],
+  "license": "APACHE 2",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "example",
+    "src",
+    "build",
+    "dev",
+    "index.js",
+    "package.json",
+    "gulpfile.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:exo-sa/swagger2-client-generator.git"
+  }
+}
