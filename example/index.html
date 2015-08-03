@@ -5,10 +5,13 @@
   <title>Swagger JS API Example</title>
 </head>
 <body>
-	Example: <span id="example"></span>
 
-  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
-  <script src="swagger2-client-generator.js"></script>
+  <H3>Inventory: </H3><pre id="inventory" class="prettyprint lang-js"></pre>
+  <H3>Pet: </H3><pre id="pet" class="prettyprint lang-js"></pre>
+
+  <script src="http://code.jquery.com/jquery-1.11.0.js"></script>
+  <script src="../dist/swagger2-client-generator.js"></script>
+  <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
   <script>
 
     function requestHandler(error, request){
@@ -31,12 +34,20 @@
     }
 
 
-    $.getJSON('./swagger.json', function(swaggerJson){
-      var api = swaggerClientGenerator(swaggerJson, requestHandler);
-      
-      api.pet.getPetById(2, function(response){
-        console.log(response);
-      });
+    $.getJSON('./swagger.json', {}, function(swaggerJson){
+      var api = swagger2ClientGenerator(swaggerJson, requestHandler);
+
+      var id = 15;
+      var responsepet = function(response){
+        document.getElementById("pet").innerHTML = JSON.stringify(JSON.parse(response), null, 2);
+      };
+      var responseinventory = function(response){
+        document.getElementById("inventory").innerHTML = JSON.stringify(JSON.parse(response), null, 2);
+      };
+
+      api.store.getInventory({}, responseinventory);
+      api.pet.getPetById(id, responsepet);
+
     });
   </script>
 </body>
