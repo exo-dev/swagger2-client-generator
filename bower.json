@@ -10,7 +10,7 @@
   "main": [
     "dist/swagger2-client-generator.js"
   ],
-  "homepage": "https://github.com/exo-sa/swagger2-client-generator",
+  "homepage": "https://github.com/exo-dev/swagger2-client-generator",
   "authors": [
     "Federico Gonzalez <federicogonzalez761@gmail.com>"
   ],
@@ -34,6 +34,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:exo-sa/swagger2-client-generator.git"
+    "url": "git@github.com:exo-dev/swagger2-client-generator.git"
   }
 }

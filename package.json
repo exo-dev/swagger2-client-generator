@@ -22,24 +22,23 @@
   },
   "scripts": {
     "prepublish": "node ./node_modules/bower/bin/bower install && node ./node_modules/gulp/bin/gulp.js",
-    "test": "node ./node_modules/gulp/bin/gulp.js test",
     "dev": "node ./node_modules/gulp/bin/gulp.js dev",
     "dist": "node ./node_modules/gulp/bin/gulp.js"
   },
   "licenses": [
     {
       "type": "Apache License 2.0",
-      "url": "https://github.com/exo-sa/swagger2-client-generator/blob/master/LICENSE.md"
+      "url": "https://github.com/exo-dev/swagger2-client-generator/blob/master/LICENSE.md"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/exo-sa/swagger2-client-generator.git"
+    "url": "git://github.com/exo-dev/swagger2-client-generator.git"
   },
   "bugs": {
-    "url": "https://github.com/exo-sa/swagger2-client-generator/issues"
+    "url": "https://github.com/exo-dev/swagger2-client-generator/issues"
   },
-  "homepage": "https://github.com/exo-sa/swagger2-client-generator",
+  "homepage": "https://github.com/exo-dev/swagger2-client-generator",
   "dependencies": {
     "swagger-validate": "^0.1.1"
   }
