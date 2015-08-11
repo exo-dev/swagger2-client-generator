@@ -37,20 +37,35 @@ function processApiAuthArgs(args){
   }
 }
 
-function updateSchema(swaggerJson){
-  var model;
-  for (var path in swaggerJson.paths) {
-    var methodInUse = swaggerJson.paths[path].get || swaggerJson.paths[path].post || swaggerJson.paths[path].put;
-    if (methodInUse.responses['200'] && ('items' in methodInUse.responses['200'].schema || '$ref' in methodInUse.responses['200'].schema)){
-      if ('type' in methodInUse.responses['200'].schema)
-        model = methodInUse.responses['200'].schema.items['$ref'].split('/').pop();
-      else model = methodInUse.responses['200'].schema['$ref'].split('/').pop();
+function selectModel(actualPath){
+  var model = null;
+  var methodToUse = [actualPath.get, actualPath.post, actualPath.put];
+  for (var method in methodToUse){
+    var methodInUse = methodToUse[method];
+    if (methodInUse){
+      for (var httpCode in methodInUse.responses){
+        if (methodInUse.responses[httpCode].schema){
+          var httpSchema = methodInUse.responses[httpCode].schema;
+          if (httpSchema.items || httpSchema.$ref){
+            if ('type' in httpSchema) model = httpSchema.items.$ref.split('/').pop();
+            else model = httpSchema.$ref.split('/').pop();
+            return model;
+          }
+        }
+      }
     }
-    for (var method in swaggerJson.paths[path]){
-      var models = [swaggerJson.definitions[model]];
-      swaggerJson.paths[path][method].path = path;
-      swaggerJson.paths[path][method].basePath = 'http://'+swaggerJson.host+swaggerJson.basePath;
-      swaggerJson.paths[path][method].models = models;
+  }
+ return model;
+}
+
+function updateSchema(swaggerJson){
+  for (var path in swaggerJson.paths) {
+    var actualPath = swaggerJson.paths[path];
+    var model = selectModel(actualPath);
+    for (var method in actualPath){
+      actualPath[method].path = path;
+      actualPath[method].basePath = swaggerJson.schemes[0] +'://'+swaggerJson.host+swaggerJson.basePath;
+      actualPath[method].models = [swaggerJson.definitions[model]];
     }
   }
   return swaggerJson;
