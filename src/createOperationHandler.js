@@ -28,9 +28,9 @@ function createOperationHandler(operation, getAuthData, requestHandler){
   var operationHandler = function(data, options){
     var error,
       request;
-    
+
     options = options || {};
-    
+
     if(data == null) data = {};
 
     // if a function is passed in as options, assume it's a callback function
@@ -45,22 +45,22 @@ function createOperationHandler(operation, getAuthData, requestHandler){
       data = removeUnknownParams(operation, data);
 
       error = swaggerValidate.operation(data, operation, operation.models);
-      
+
       request = new Request(data, options);
-      
+
       // If we know there is an error, don't attempt to craft the request params.
       // The request param generators assume valid data to work properly.
       if(!error){
         request.url = getRequestUrl(operation, data);
         request.headers = getRequestHeaders(operation, data, options);
         request.body = getRequestBody(operation, data, request.headers);
-        
+
         applyAuthData(operation, getAuthData(), request);
       }
     } catch(e){
       error = e;
     }
-    
+
     return requestHandler(error, request);
   };
 
@@ -70,7 +70,7 @@ function createOperationHandler(operation, getAuthData, requestHandler){
 
   // Useful for reflection
   operationHandler.operation = operation;
-  
+
   operationHandler.getUrl = function(data){
     data = prune(data);
     data = singleParamConvenienceProcessor(operation, data);
@@ -78,7 +78,7 @@ function createOperationHandler(operation, getAuthData, requestHandler){
 
     var error = swaggerValidate.operation(data, operation, operation.models);
     if(error) throw error;
-    
+
     return getRequestUrl(operation, data);
   };
 
@@ -119,7 +119,7 @@ function singleParamConvenienceProcessor(operation, data){
   if(requiredParams.length !== 1 && operation.parameters.length !== 1) return data;
 
   var param = requiredParams[0] || operation.parameters[0];
-  
+
   // If the param is already defined explicitly, bail
   if(typeof data === 'object' &&  data[param.name] !== undefined) return data;
 
@@ -129,11 +129,11 @@ function singleParamConvenienceProcessor(operation, data){
   var error;
 
   try {
-    error = swaggerValidate.dataType(data, param, models); 
+    error = swaggerValidate.dataType(data, param, models);
   } catch(e){
     return data;
   }
-  
+
   // If the data passed is a valid param data type, bail
   if(!error){
     var wrapper = {};
@@ -143,7 +143,7 @@ function singleParamConvenienceProcessor(operation, data){
     return data;
   }
 }
- 
+
 
 function removeUnknownParams(operation, data){
   if(!data || typeof data !== 'object') return data;
@@ -157,7 +157,7 @@ function removeUnknownParams(operation, data){
     return !(key in paramNames);
   });
 
-  createOperationHandler.logger.warn('Unknown parameters removed from request:', 
+  createOperationHandler.logger.warn('Unknown parameters removed from request:',
     unknownKeys.join(', '));
 
   unknownKeys.forEach(function(key){
