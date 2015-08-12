@@ -8,12 +8,8 @@ describe('get request url', function(){
 
   beforeEach(function(){
     basicOperation = {
-      apiObject: {
-        apiDeclaration: {
-          basePath: 'http://example.com/api'
-        },
-        path: '/do/it'
-      },
+      basePath: 'http://example.com/api',
+      path: '/do/it',
       parameters: [
         {
           paramType: 'query',
@@ -24,12 +20,8 @@ describe('get request url', function(){
     };
 
     arrayOperation = {
-      apiObject: {
-        apiDeclaration: {
-          basePath: 'http://example.com/api'
-        },
-        path: '/do/it'
-      },
+      basePath: 'http://example.com/api',
+      path: '/do/it',
       parameters: [
         {
           paramType: 'query',
@@ -43,12 +35,8 @@ describe('get request url', function(){
     };
 
     complexOperation = {
-      apiObject: {
-        apiDeclaration: {
-          basePath: 'http://example.com/api'
-        },
-        path: '/do/{what}.{format}'
-      },
+      basePath: 'http://example.com/api',
+      path: '/do/{what}.{format}',
       parameters: [
         {
           paramType: 'path',
