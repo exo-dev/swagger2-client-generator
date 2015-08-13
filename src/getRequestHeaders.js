@@ -12,7 +12,7 @@ module.exports = function getRequestHeaders(operation, data, options){
   var headers = {};
 
   operation.parameters.forEach(function(param){
-    if(param.paramType === 'header' && data[param.name] != null){
+    if(param.in === 'header' && data[param.name] != null){
       headers[param.name] = data[param.name];
     }
   });
@@ -28,7 +28,7 @@ module.exports = function getRequestHeaders(operation, data, options){
   var contentType = options.contentType || getContentType(operation, data, options);
   if(contentType) {
     if(hasAccept(operation, contentType)){
-      headers['Content-Type'] = contentType;  
+      headers['Content-Type'] = contentType;
     } else {
       throw new ContentTypeNotSupportedError(contentType, operation);
     }
@@ -38,28 +38,28 @@ module.exports = function getRequestHeaders(operation, data, options){
   var accept = options.accept || DEFAULT_ACCEPT;
   if(accept){
     if(hasContentType(operation, accept)){
-      headers.Accept = accept;  
+      headers.Accept = accept;
     } else {
       throw new AcceptsNotSupportedError(accept, operation);
     }
   }
-  
+
   return headers;
 };
 
 function getContentType(operation, data){
   var hasBody = operation.parameters.some(function(param){
-    return param.paramType === 'body' && data[param.name] !== undefined;
+    return param.in === 'body' && data[param.name] !== undefined;
   });
 
   if (hasBody){
     return 'application/json';
   } else {
     var hasFormParams = operation.parameters.some(function(param){
-      return param.paramType === 'form' && data[param.name] !== undefined;
+      return param.in === 'formData' && data[param.name] !== undefined;
     });
 
-    var hasFileParam = hasFormParams && 
+    var hasFileParam = hasFormParams &&
       operation.parameters.some(function(param){
         return param.type === 'File' && data[param.name] !== undefined;
       });
