@@ -25,7 +25,7 @@ describe('create operation handler', function(){
       path: '/do/it',
       parameters: [
         {
-          paramType: 'query',
+          in: 'query',
           type: 'number',
           name: 'queryParam'
         }
@@ -45,37 +45,37 @@ describe('create operation handler', function(){
       produces: ['application/json'],
       parameters: [
         {
-          paramType: 'path',
+          in: 'path',
           type: 'string',
           name: 'pathParam'
         },
         {
-          paramType: 'form',
+          in: 'form',
           type: 'string',
           name: 'formParam'
         },
         {
-          paramType: 'form',
+          in: 'form',
           type: 'string',
           name: 'otherFormParam'
         },
         {
-          paramType: 'body',
+          in: 'body',
           type: 'string',
           name: 'theBody'
         },
         {
-          paramType: 'query',
+          in: 'query',
           type: 'string',
           name: 'queryParam'
         },
         {
-          paramType: 'query',
+          in: 'query',
           type: 'number',
           name: 'queryNumberParam'
         },
         {
-          paramType: 'form',
+          in: 'form',
           type: 'File',
           name: 'theFile'
         }

@@ -9,9 +9,8 @@ module.exports = function getRequestUrl(operation, data){
   url = applyPathParams(url, operation, data);
 
   if(!data) return url;
-
   var queryParams = operation.parameters.filter(function(param){
-    return param.paramType === 'query' && data[param.name] !== undefined;
+    return param.in === 'query' && data[param.name] !== undefined;
   }).map(function(param){
     var key = param.name;
     var encodedKey = encodeURIComponent(key);
@@ -36,7 +35,7 @@ module.exports = function getRequestUrl(operation, data){
 
 function applyPathParams(url, operation, data){
   var pathParams = operation.parameters.filter(function(param){
-    return param.paramType === 'path';
+    return param.in === 'path';
   });
 
   var missingParams = pathParams.filter(function(param){
