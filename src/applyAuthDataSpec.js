@@ -17,11 +17,7 @@ describe('apply auth data', function(){
 
   it('doesn\'t change the request if there is no auth for the op', function(){
     var noAuthOperation = {
-      apiObject: {
-        apiDeclaration: {
-          authorizations: {}
-        }
-      }
+      authorizations: {}
     };
 
     applyAuthData(noAuthOperation, undefined, request);
@@ -59,15 +55,11 @@ describe('apply auth data', function(){
 
   it('uses the api-level auth if no op-level auth exists', function(){
     var operation = {
-      apiObject: {
-        apiDeclaration: {
-          authorizations: {
-            apiKey: {
-              type: 'apiKey',
-              keyname: 'apiToken',
-              passAs: 'query'
-            }
-          }
+      authorizations: {
+        apiKey: {
+          type: 'apiKey',
+          keyname: 'apiToken',
+          passAs: 'query'
         }
       }
     };
@@ -78,15 +70,11 @@ describe('apply auth data', function(){
 
   it('throws a missing auth error if required auth params are not present', function(){
     var operation = {
-      apiObject: {
-        apiDeclaration: {
-          authorizations: {
-            apiKey: {
-              type: 'apiKey',
-              keyname: 'apiToken',
-              passAs: 'query'
-            }
-          }
+      authorizations: {
+        apiKey: {
+          type: 'apiKey',
+          keyname: 'apiToken',
+          passAs: 'query'
         }
       }
     };
@@ -97,18 +85,14 @@ describe('apply auth data', function(){
 
   it('does not throw a missing auth error if only one of many auth methods present', function(){
     var operation = {
-      apiObject: {
-        apiDeclaration: {
-          authorizations: {
-            apiKey: {
-              type: 'apiKey',
-              keyname: 'apiToken',
-              passAs: 'query'
-            },
-            basicAuth: {
-              type: 'basicAuth'
-            }
-          }
+      authorizations: {
+        apiKey: {
+          type: 'apiKey',
+          keyname: 'apiToken',
+          passAs: 'query'
+        },
+        basicAuth: {
+          type: 'basicAuth'
         }
       }
     };
@@ -120,15 +104,11 @@ describe('apply auth data', function(){
 
   it('can apply apikeys to headers', function(){
     var operation = {
-      apiObject: {
-        apiDeclaration: {
-          authorizations: {
-            apiKey: {
-              type: 'apiKey',
-              keyname: 'apiToken',
-              passAs: 'header'
-            }
-          }
+      authorizations: {
+        apiKey: {
+          type: 'apiKey',
+          keyname: 'apiToken',
+          passAs: 'header'
         }
       }
     };
@@ -142,13 +122,9 @@ describe('apply auth data', function(){
 
   it('can apply basic auth to urls', function(){
     var operation = {
-      apiObject: {
-        apiDeclaration: {
-          authorizations: {
-            apiKey: {
-              type: 'basicAuth',
-            }
-          }
+      authorizations: {
+        apiKey: {
+          type: 'basicAuth',
         }
       }
     };
@@ -159,23 +135,19 @@ describe('apply auth data', function(){
 
   it('can apply multiple auths to a request', function(){
     var operation = {
-      apiObject: {
-        apiDeclaration: {
-          authorizations: {
-            basicAuth: {
-              type: 'basicAuth',
-            },
-            apiKeyHeader: {
-              type: 'apiKey',
-              keyname: 'headerToken',
-              passAs: 'header'
-            },
-            apiKeyQuery: {
-              type: 'apiKey',
-              keyname: 'queryToken',
-              passAs: 'header'
-            }
-          }
+      authorizations: {
+        basicAuth: {
+          type: 'basicAuth',
+        },
+        apiKeyHeader: {
+          type: 'apiKey',
+          keyname: 'headerToken',
+          passAs: 'header'
+        },
+        apiKeyQuery: {
+          type: 'apiKey',
+          keyname: 'queryToken',
+          passAs: 'header'
         }
       }
     };

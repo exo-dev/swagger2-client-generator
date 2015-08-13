@@ -193,7 +193,7 @@ describe('create operation handler', function(){
   });
 
   it('returns missing auth exceptions when auth params are missing', function(){
-    basicOperation.security = {
+    basicOperation.authorizations = {
       type: 'basic',
     };
 
