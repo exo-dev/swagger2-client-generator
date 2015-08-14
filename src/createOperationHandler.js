@@ -16,7 +16,7 @@ Object.keys(errorTypes).forEach(function(errorName){
   allErrorTypes[errorName] = errorTypes[errorName];
 });
 
-function createOperationHandler(operation, getAuthData, requestHandler){
+function createOperationHandler(operation, securityDefinitions, getAuthData, requestHandler){
   function Request(data, options){
     this.method = operation.method;
     this.operation = operation;
@@ -55,7 +55,7 @@ function createOperationHandler(operation, getAuthData, requestHandler){
         request.headers = getRequestHeaders(operation, data, options);
         request.body = getRequestBody(operation, data, request.headers);
 
-        applyAuthData(operation, getAuthData(), request);
+        applyAuthData(operation, securityDefinitions, getAuthData(), request);
       }
     } catch(e){
       error = e;

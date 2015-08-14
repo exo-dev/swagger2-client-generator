@@ -3,7 +3,7 @@
 var applyAuthData = require('./applyAuthData');
 
 describe('apply auth data', function(){
-  var request;
+  var request, securityDefinitions;
 
   beforeEach(function(){
     request = {
@@ -13,11 +13,18 @@ describe('apply auth data', function(){
       },
       body: 'Hello, world'
     };
+    securityDefinitions = {
+      apiKey: {
+        type: 'apiKey',
+        name: 'apiToken',
+        in: 'query'
+      }
+    };
   });
 
   it('doesn\'t change the request if there is no auth for the op', function(){
     var noAuthOperation = {
-      authorizations: {}
+      security: {}
     };
 
     applyAuthData(noAuthOperation, undefined, request);
@@ -27,93 +34,55 @@ describe('apply auth data', function(){
     expect(request.body).toBe('Hello, world');
   });
 
-  it('respects the op-level auth override if it exists', function(){
+  it('always uses the op-level auth and the security definitions', function(){
     var operation = {
-      authorizations: {
-        apiKey: {
-          type: 'apiKey',
-          keyname: 'opToken',
-          passAs: 'query'
-        }
-      },
-      apiObject: {
-        apiDeclaration: {
-          authorizations: {
-            apiKey: {
-              type: 'apiKey',
-              keyname: 'apiToken',
-              passAs: 'query'
-            }
-          }
-        }
-      }
+      security: [{
+        apiKey: {}
+      }]
     };
 
-    applyAuthData(operation, '123', request);
-    expect(request.url).toBe('http://example.com?opToken=123&param=value');
-  });
-
-  it('uses the api-level auth if no op-level auth exists', function(){
-    var operation = {
-      authorizations: {
-        apiKey: {
-          type: 'apiKey',
-          keyname: 'apiToken',
-          passAs: 'query'
-        }
-      }
-    };
-
-    applyAuthData(operation, '123', request);
+    applyAuthData(operation, securityDefinitions, '123', request);
     expect(request.url).toBe('http://example.com?apiToken=123&param=value');
   });
 
   it('throws a missing auth error if required auth params are not present', function(){
     var operation = {
-      authorizations: {
-        apiKey: {
-          type: 'apiKey',
-          keyname: 'apiToken',
-          passAs: 'query'
-        }
-      }
+      security: [{
+        apiKey: {}
+      }]
     };
+
     expect(function(){
-      applyAuthData(operation, undefined, request);
+      applyAuthData(operation, securityDefinitions, undefined, request);
     }).toThrow();
   });
 
   it('does not throw a missing auth error if only one of many auth methods present', function(){
     var operation = {
-      authorizations: {
-        apiKey: {
-          type: 'apiKey',
-          keyname: 'apiToken',
-          passAs: 'query'
-        },
-        basicAuth: {
-          type: 'basicAuth'
-        }
-      }
+      security: [
+        {basicAuth: {}},
+        {apiKey: {}}
+      ]
     };
+    var authData = {basicAuth: {username: 'Bob', password: 'secret' }};
+
+    securityDefinitions.basicAuth = {type: 'basic'}
 
     expect(function(){
-      applyAuthData(operation, {basicAuth: {username: 'Bob', password: 'secret' }}, request);
+      applyAuthData(operation, securityDefinitions, authData, request);
     }).not.toThrow();
   });
 
   it('can apply apikeys to headers', function(){
     var operation = {
-      authorizations: {
-        apiKey: {
-          type: 'apiKey',
-          keyname: 'apiToken',
-          passAs: 'header'
-        }
-      }
+      security: [{
+        apiKey: {}
+      }]
     };
 
-    applyAuthData(operation, '123', request);
+    securityDefinitions.apiKey.in = 'header';
+
+    applyAuthData(operation, securityDefinitions, '123', request);
     expect(request.headers).toEqual({
       'Content-Type': 'text/plain',
       'apiToken': '123'
@@ -122,42 +91,42 @@ describe('apply auth data', function(){
 
   it('can apply basic auth to urls', function(){
     var operation = {
-      authorizations: {
-        apiKey: {
-          type: 'basicAuth',
-        }
-      }
+      security: [{
+        basicAuth: {}
+      }]
     };
+    var authData = {basicAuth: {username: 'Bob', password: 'secret' }};
+    securityDefinitions.basicAuth = {type: 'basic'};
 
-    applyAuthData(operation, {username: 'Bob', password: 'secret' }, request);
+    applyAuthData(operation, securityDefinitions, authData, request);
     expect(request.url).toEqual('http://Bob:secret@example.com?param=value');
   });
 
-  it('can apply multiple auths to a request', function(){
-    var operation = {
-      authorizations: {
-        basicAuth: {
-          type: 'basicAuth',
-        },
-        apiKeyHeader: {
-          type: 'apiKey',
-          keyname: 'headerToken',
-          passAs: 'header'
-        },
-        apiKeyQuery: {
-          type: 'apiKey',
-          keyname: 'queryToken',
-          passAs: 'header'
-        }
-      }
-    };
+  // it('can apply multiple auths to a request', function(){
+  //   var operation = {
+  //     security: [{
+  //       basicAuth: {
+  //         type: 'basic',
+  //       },
+  //       apiKeyHeader: {
+  //         type: 'apiKey',
+  //         name: 'headerToken',
+  //         in: 'header'
+  //       },
+  //       apiKeyQuery: {
+  //         type: 'apiKey',
+  //         name: 'queryToken',
+  //         in: 'header'
+  //       }
+  //     }]
+  //   };
 
-    applyAuthData(operation, {
-      basicAuth: {username: 'Bob', password: 'secret' },
-      apiKeyQuery: 'query',
-      apiKeyHeader: 'header'
-    }, request);
+  //   applyAuthData(operation, {
+  //     basicAuth: {username: 'Bob', password: 'secret' },
+  //     apiKeyQuery: 'query',
+  //     apiKeyHeader: 'header'
+  //   }, request);
 
-    expect(request.url).toEqual('http://Bob:secret@example.com?param=value');
-  });
+  //   expect(request.url).toEqual('http://Bob:secret@example.com?param=value');
+  // });
 });

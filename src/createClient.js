@@ -3,24 +3,67 @@
 var createOperationHandler = require('./createOperationHandler');
 
 function createClient(schema, requestHandler){
+  var apiAuthData;
+  var authMethodName = 'auth';
+  var apiObject = {};
 
   schema = updateSchema(schema);
 
-  var apiObject = {};
-  var getAuthData = function(){};
-
-  for (var path in schema.paths){
-    var declaration = schema.paths[path];
-    for (var method in declaration) {
-      var operation = declaration[method];
-      var operationId = operation.operationId;
-      var model = operation.tags[0];
-      apiObject[model] = apiObject[model] || {};
-      operation.method = method.toUpperCase();
-      var operationHandler = createOperationHandler(operation, getAuthData, requestHandler);
-      apiObject[model][operationId] = operationHandler;
+  // if some model is named auth, we use authorization instead
+  Object.keys(schema.paths).some(function(path) {
+    if (getModelName(path) === 'auth') {
+      authMethodName = 'authorization';
+      return true;
     }
+  });
+
+  var securityDefinitions = schema.securityDefinitions;
+
+  apiObject[authMethodName] = function(){
+    if(arguments.length === 0) return apiAuthData;
+    apiAuthData = processApiAuthArgs(arguments);
+  };
+
+  for (var path in schema.paths) {
+    var modelAuthData;
+    var declaration = schema.paths[path];
+    var model = getModelName(path);
+
+    if (!apiObject[model]) {
+      apiObject[model] = {}
+      apiObject[model][authMethodName] = function(){
+        if(arguments.length === 0) return modelAuthData;
+        modelAuthData = processApiAuthArgs(arguments);
+      }
+    }
+
+    Object.keys(declaration).forEach(function(methodName) {
+      var operation = declaration[methodName];
+      var operationId = operation.operationId;
+      var operationAuthData;
+
+      var getAuthData = function() {
+        return operationAuthData || modelAuthData || apiAuthData;
+      }
+      operation.method = methodName.toUpperCase();
+
+      // Use schema's security definition in case of no operation definition.
+      if (typeof operation.security === 'undefined') {
+        // If operation's security is defined, it overrides top level security
+        operation.security = schema.security;
+      }
+
+      var operationHandler = createOperationHandler(operation, securityDefinitions, getAuthData, requestHandler);
+      apiObject[model][operationId] = operationHandler;
+
+      operationHandler[authMethodName]  = function(){
+        if(arguments.length === 0) return operationAuthData;
+        operationAuthData = processApiAuthArgs(arguments);
+      };
+
+    });
   }
+
   return apiObject;
 }
 module.exports = createClient;
@@ -64,11 +107,17 @@ function updateSchema(swaggerJson){
     var model = selectModel(actualPath);
     for (var method in actualPath){
       actualPath[method].path = path;
-      actualPath[method].basePath = swaggerJson.schemes[0] +'://'+swaggerJson.host+swaggerJson.basePath;
-      actualPath[method].models = [swaggerJson.definitions[model]];
+      actualPath[method].basePath = swaggerJson.schemes[0]+'://'+swaggerJson.host+swaggerJson.basePath;
+      if (model) {
+        actualPath[method].models = [swaggerJson.definitions[model]];
+      }
     }
   }
   return swaggerJson;
+}
+
+function getModelName(path) {
+  return path.split('/')[1];
 }
 
 // Takes a path and returns a JavaScript-friendly variable name
