@@ -16,7 +16,7 @@ Object.keys(errorTypes).forEach(function(errorName){
   allErrorTypes[errorName] = errorTypes[errorName];
 });
 
-function createOperationHandler(operation, securityDefinitions, getAuthData, requestHandler){
+function createOperationHandler(operation, schema, getAuthData, requestHandler){
   function Request(data, options){
     this.method = operation.method;
     this.operation = operation;
@@ -24,6 +24,9 @@ function createOperationHandler(operation, securityDefinitions, getAuthData, req
     this.data = data;
     this.options = options;
   }
+
+  var securityDefinitions = schema.securityDefinitions,
+      definitions = schema.definitions;
 
   var operationHandler = function(data, options){
     var error,
@@ -41,11 +44,10 @@ function createOperationHandler(operation, securityDefinitions, getAuthData, req
 
     try{
       data = prune(data);
-      data = singleParamConvenienceProcessor(operation, data);
+      data = singleParamConvenienceProcessor(operation, data, definitions);
       data = removeUnknownParams(operation, data);
 
-      error = swaggerValidate.operation(data, operation, operation.models);
-
+      error = swaggerValidate.operation(data, operation, definitions);
       request = new Request(data, options);
 
       // If we know there is an error, don't attempt to craft the request params.
@@ -73,10 +75,10 @@ function createOperationHandler(operation, securityDefinitions, getAuthData, req
 
   operationHandler.getUrl = function(data){
     data = prune(data);
-    data = singleParamConvenienceProcessor(operation, data);
+    data = singleParamConvenienceProcessor(operation, data, definitions);
     data = removeUnknownParams(operation, data);
 
-    var error = swaggerValidate.operation(data, operation, operation.models);
+    var error = swaggerValidate.operation(data, operation, definitions);
     if(error) throw error;
 
     return getRequestUrl(operation, data);
@@ -85,7 +87,7 @@ function createOperationHandler(operation, securityDefinitions, getAuthData, req
 
   // Can be used to preemptively validate without action
   operationHandler.validate = function(data){
-    return swaggerValidate.operation(data, operation, operation.models);
+    return swaggerValidate.operation(data, operation, definitions);
   };
 
   return operationHandler;
@@ -106,7 +108,7 @@ function prune(data){
 }
 
 // Enables data to be passed directly for single param operations.
-function singleParamConvenienceProcessor(operation, data){
+function singleParamConvenienceProcessor(operation, data, definitions){
   // If there are more than one params, bail
   var requiredParams = operation.parameters.filter(function(param){
     return param.required;
@@ -123,13 +125,11 @@ function singleParamConvenienceProcessor(operation, data){
   // If the param is already defined explicitly, bail
   if(typeof data === 'object' &&  data[param.name] !== undefined) return data;
 
-  var models = operation.models;
-
   // If the data passed is is not valid for the param data type, bail
   var error;
 
   try {
-    error = swaggerValidate.dataType(data, param, models);
+    error = swaggerValidate.dataType(data, param, definitions);
   } catch(e){
     return data;
   }

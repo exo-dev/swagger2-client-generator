@@ -8,7 +8,6 @@ function createClient(schema, requestHandler){
   var apiObject = {};
 
   schema = updateSchema(schema);
-
   // if some model is named auth, we use authorization instead
   Object.keys(schema.paths).some(function(path) {
     if (getModelName(path) === 'auth') {
@@ -16,8 +15,6 @@ function createClient(schema, requestHandler){
       return true;
     }
   });
-
-  var securityDefinitions = schema.securityDefinitions;
 
   apiObject[authMethodName] = function(){
     if(arguments.length === 0) return apiAuthData;
@@ -53,7 +50,7 @@ function createClient(schema, requestHandler){
         operation.security = schema.security;
       }
 
-      var operationHandler = createOperationHandler(operation, securityDefinitions, getAuthData, requestHandler);
+      var operationHandler = createOperationHandler(operation, schema, getAuthData, requestHandler);
       apiObject[model][operationId] = operationHandler;
 
       operationHandler[authMethodName]  = function(){
@@ -80,37 +77,28 @@ function processApiAuthArgs(args){
   }
 }
 
-function selectModel(actualPath){
-  var model = null;
-  var methodToUse = [actualPath.get, actualPath.post, actualPath.put];
-  for (var method in methodToUse){
-    var methodInUse = methodToUse[method];
-    if (methodInUse){
-      for (var httpCode in methodInUse.responses){
-        if (methodInUse.responses[httpCode].schema){
-          var httpSchema = methodInUse.responses[httpCode].schema;
-          if (httpSchema.items || httpSchema.$ref){
-            if ('type' in httpSchema) model = httpSchema.items.$ref.split('/').pop();
-            else model = httpSchema.$ref.split('/').pop();
-            return model;
-          }
-        }
-      }
-    }
-  }
- return model;
-}
-
 function updateSchema(swaggerJson){
   for (var path in swaggerJson.paths) {
     var actualPath = swaggerJson.paths[path];
-    var model = selectModel(actualPath);
-    for (var method in actualPath){
-      actualPath[method].path = path;
-      actualPath[method].basePath = swaggerJson.schemes[0]+'://'+swaggerJson.host+swaggerJson.basePath;
-      if (model) {
-        actualPath[method].models = [swaggerJson.definitions[model]];
-      }
+    for (var methodName in actualPath){
+      var method = actualPath[methodName];
+
+      method.path = path;
+      method.basePath = swaggerJson.schemes[0]+'://'+swaggerJson.host+swaggerJson.basePath;
+
+      method.parameters.forEach(function(parameter) {
+
+        var source = parameter.items || parameter;
+        if (source.schema && source.schema.$ref) {
+          var $ref = source.schema.$ref;
+          var model = $ref.split('/').pop();
+          var definition = swaggerJson.definitions[model];
+
+          // This version of swagger validate needs the parameter's type to be defined
+          source.type = model;
+          source.schema = definition;
+        }
+      });
     }
   }
   return swaggerJson;
