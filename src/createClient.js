@@ -7,7 +7,8 @@ function createClient(schema, requestHandler){
   var authMethodName = 'auth';
   var apiObject = {};
 
-  schema = updateSchema(schema);
+  var basePath = schema.schemes[0] + '://' + schema.host + schema.basePath;
+
   // if some model is named auth, we use authorization instead
   Object.keys(schema.paths).some(function(path) {
     if (getModelName(path) === 'auth') {
@@ -42,7 +43,24 @@ function createClient(schema, requestHandler){
       var getAuthData = function() {
         return operationAuthData || modelAuthData || apiAuthData;
       }
+
+      operation.path = path;
+      operation.basePath = basePath;
       operation.method = methodName.toUpperCase();
+
+      operation.parameters.forEach(function(parameter) {
+
+        var source = parameter.items || parameter;
+        if (source.schema && source.schema.$ref) {
+          var $ref = source.schema.$ref;
+          var model = $ref.split('/').pop();
+          var definition = schema.definitions[model];
+
+          // This version of swagger validate needs the parameter's type to be defined
+          source.type = model;
+          source.schema = definition;
+        }
+      });
 
       // Use schema's security definition in case of no operation definition.
       if (typeof operation.security === 'undefined') {
@@ -77,48 +95,6 @@ function processApiAuthArgs(args){
   }
 }
 
-function updateSchema(swaggerJson){
-  for (var path in swaggerJson.paths) {
-    var actualPath = swaggerJson.paths[path];
-    for (var methodName in actualPath){
-      var method = actualPath[methodName];
-
-      method.path = path;
-      method.basePath = swaggerJson.schemes[0]+'://'+swaggerJson.host+swaggerJson.basePath;
-
-      method.parameters.forEach(function(parameter) {
-
-        var source = parameter.items || parameter;
-        if (source.schema && source.schema.$ref) {
-          var $ref = source.schema.$ref;
-          var model = $ref.split('/').pop();
-          var definition = swaggerJson.definitions[model];
-
-          // This version of swagger validate needs the parameter's type to be defined
-          source.type = model;
-          source.schema = definition;
-        }
-      });
-    }
-  }
-  return swaggerJson;
-}
-
 function getModelName(path) {
   return path.split('/')[1];
-}
-
-// Takes a path and returns a JavaScript-friendly variable name
-function getApiName(name){
-  // String non-word characters
-  name = name.replace(/\W/g, '/');
-
-  // Turn paths which look/like/this to lookLikeThis
-  name = name.replace(/(\w)\/(\w)/g, function(match, p1, p2){
-    return p1 + p2.toUpperCase();
-  });
-
-  name = name.replace(/\//g, '');
-
-  return name;
 }
