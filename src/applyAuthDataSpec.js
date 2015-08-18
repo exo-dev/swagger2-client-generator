@@ -102,6 +102,7 @@ describe('apply auth data', function(){
     expect(request.url).toEqual('http://Bob:secret@example.com?param=value');
   });
 
+  // TODO: refactor the test to swagger 2.0 security spec and make the code fulfill it
   // it('can apply multiple auths to a request', function(){
   //   var operation = {
   //     security: [{
