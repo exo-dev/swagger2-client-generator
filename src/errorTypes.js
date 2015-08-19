@@ -10,9 +10,9 @@ InvalidRequestError.prototype.constructor = InvalidRequestError;
 exports.InvalidRequestError = InvalidRequestError;
 
 
-function MissingAuthorizationError(authName, auth){
+function MissingAuthorizationError(requirementNames, auth){
   this.name = 'MissingAuthorizationError';
-  this.message = 'Could not fulfill security requirement: ' + authName;
+  this.message = 'Could not fulfill security requirements: ' + requirementNames;
   this.authorization = auth;
 }
 MissingAuthorizationError.prototype = Object.create(InvalidRequestError.prototype);

@@ -3,7 +3,7 @@
 var applyAuthData = require('./applyAuthData');
 
 describe('apply auth data', function(){
-  var request, securityDefinitions;
+  var request, basicDefinitions, complexDefinitions;
 
   beforeEach(function(){
     request = {
@@ -13,10 +13,25 @@ describe('apply auth data', function(){
       },
       body: 'Hello, world'
     };
-    securityDefinitions = {
+    basicDefinitions = {
       apiKey: {
         type: 'apiKey',
         name: 'apiToken',
+        in: 'query'
+      }
+    };
+    complexDefinitions = {
+      basicAuth: {
+        type: 'basic',
+      },
+      apiKeyHeader: {
+        type: 'apiKey',
+        name: 'headerToken',
+        in: 'header'
+      },
+      apiKeyQuery: {
+        type: 'apiKey',
+        name: 'queryToken',
         in: 'query'
       }
     };
@@ -41,7 +56,7 @@ describe('apply auth data', function(){
       }]
     };
 
-    applyAuthData(operation, securityDefinitions, '123', request);
+    applyAuthData(operation, basicDefinitions, '123', request);
     expect(request.url).toBe('http://example.com?apiToken=123&param=value');
   });
 
@@ -53,7 +68,7 @@ describe('apply auth data', function(){
     };
 
     expect(function(){
-      applyAuthData(operation, securityDefinitions, undefined, request);
+      applyAuthData(operation, basicDefinitions, undefined, request);
     }).toThrow();
   });
 
@@ -66,26 +81,22 @@ describe('apply auth data', function(){
     };
     var authData = {basicAuth: {username: 'Bob', password: 'secret' }};
 
-    securityDefinitions.basicAuth = {type: 'basic'};
-
     expect(function(){
-      applyAuthData(operation, securityDefinitions, authData, request);
+      applyAuthData(operation, complexDefinitions, authData, request);
     }).not.toThrow();
   });
 
   it('can apply apikeys to headers', function(){
     var operation = {
       security: [{
-        apiKey: {}
+        apiKeyHeader: {}
       }]
     };
 
-    securityDefinitions.apiKey.in = 'header';
-
-    applyAuthData(operation, securityDefinitions, '123', request);
+    applyAuthData(operation, complexDefinitions, '123', request);
     expect(request.headers).toEqual({
       'Content-Type': 'text/plain',
-      'apiToken': '123'
+      'headerToken': '123'
     });
   });
 
@@ -96,29 +107,14 @@ describe('apply auth data', function(){
       }]
     };
     var authData = {basicAuth: {username: 'Bob', password: 'secret' }};
-    securityDefinitions.basicAuth = {type: 'basic'};
+    basicDefinitions.basicAuth = {type: 'basic'};
 
-    applyAuthData(operation, securityDefinitions, authData, request);
+    applyAuthData(operation, basicDefinitions, authData, request);
     expect(request.url).toEqual('http://Bob:secret@example.com?param=value');
   });
 
-  // TODO: refactor the test to swagger 2.0 security spec and make the code fulfill it
   it('can apply multiple auths to a request', function() {
-    var securityDefinitions = {
-      basicAuth: {
-        type: 'basic',
-      },
-      apiKeyHeader: {
-        type: 'apiKey',
-        name: 'headerToken',
-        in: 'header'
-      },
-      apiKeyQuery: {
-        type: 'apiKey',
-        name: 'queryToken',
-        in: 'query'
-      }
-    };
+
     var operation = {
       security: [{
         basicAuth: {},
@@ -127,7 +123,7 @@ describe('apply auth data', function(){
       }]
     };
 
-    applyAuthData(operation, securityDefinitions, {
+    applyAuthData(operation, complexDefinitions, {
       basicAuth: {username: 'Bob', password: 'secret' },
       apiKeyQuery: 'query',
       apiKeyHeader: 'header'
@@ -139,4 +135,55 @@ describe('apply auth data', function(){
       'headerToken': 'header'
     });
   });
+
+  it('applies the first successful security requirement', function() {
+
+    var operation = {
+      security: [{
+        basicAuth: {},
+        apiKeyQuery: {}
+      }, {
+        basicAuth: {},
+        apiKeyHeader: {}
+      }]
+    };
+
+    applyAuthData(operation, complexDefinitions, {
+      basicAuth: {username: 'Bob', password: 'secret' },
+      apiKeyHeader: 'header'
+    }, request);
+
+    expect(request.url).toEqual('http://Bob:secret@example.com?param=value');
+    expect(request.headers).toEqual({
+      'Content-Type': 'text/plain',
+      'headerToken': 'header'
+    });
+  });
+
+
+  it('fails if can not apply any of the requirements', function() {
+
+    var operation = {
+      security: [{
+        basicAuth: {},
+        apiKeyQuery: {}
+      }, {
+        apiKeyHeader: {},
+        apiKeyQuery: {}
+      }, {
+        apiKeyQuery: {}
+      }]
+    };
+
+
+    expect(function(){
+      applyAuthData(operation, complexDefinitions, {
+        basicAuth: {username: 'Bob', password: 'secret' },
+        apiKeyHeader: 'header'
+      }, request);
+    }).toThrow();
+
+  });
+
+
 });

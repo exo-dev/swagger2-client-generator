@@ -129,5 +129,4 @@ describe('create client', function(){
       .toBe('http://john_doe:secret@example.com/api/resource/all-of-it?queryParam=1');
   });
 
-
 });
