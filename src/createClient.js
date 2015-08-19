@@ -22,17 +22,17 @@ function createClient(schema, requestHandler){
     apiAuthData = processApiAuthArgs(arguments);
   };
 
-  for (var path in schema.paths) {
+  Object.keys(schema.paths).forEach(function(path) {
     var modelAuthData;
     var declaration = schema.paths[path];
     var model = getModelName(path);
 
     if (!apiObject[model]) {
-      apiObject[model] = {}
+      apiObject[model] = {};
       apiObject[model][authMethodName] = function(){
         if(arguments.length === 0) return modelAuthData;
         modelAuthData = processApiAuthArgs(arguments);
-      }
+      };
     }
 
     Object.keys(declaration).forEach(function(methodName) {
@@ -42,7 +42,7 @@ function createClient(schema, requestHandler){
 
       var getAuthData = function() {
         return operationAuthData || modelAuthData || apiAuthData;
-      }
+      };
 
       operation.path = path;
       operation.basePath = basePath;
@@ -77,7 +77,7 @@ function createClient(schema, requestHandler){
       };
 
     });
-  }
+  });
 
   return apiObject;
 }

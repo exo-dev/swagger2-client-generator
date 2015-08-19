@@ -66,7 +66,7 @@ describe('apply auth data', function(){
     };
     var authData = {basicAuth: {username: 'Bob', password: 'secret' }};
 
-    securityDefinitions.basicAuth = {type: 'basic'}
+    securityDefinitions.basicAuth = {type: 'basic'};
 
     expect(function(){
       applyAuthData(operation, securityDefinitions, authData, request);

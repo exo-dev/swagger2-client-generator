@@ -47,7 +47,7 @@ describe('create client', function(){
           id: {type: 'string'}
         }}
       }
-    }
+    };
   });
 
   it('uses the resource path if it\'s available for the api name', function(){

@@ -32,7 +32,6 @@ module.exports = function applyAuthData(operation, securityDefinitions, authData
       applyBasicAuth(auth, authName, data.username, data.password, request);
     }
   });
-
 };
 
 function applyApiKey(auth, authName, apiKey, request){
