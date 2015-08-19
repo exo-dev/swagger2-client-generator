@@ -16,38 +16,23 @@ module.exports = function applyAuthData(operation, securityDefinitions, authData
 
   if(authNames.length === 0) return;
 
-  if(authNames.length === 1){
-    var authName = authNames[0];
+  authNames.forEach(function(authName) {
     var auth = securityDefinitions[authName];
-    if(!authData) throw new MissingAuthorizationError(authName, auth);
+    var data;
 
-    // Unpack nested authData for single auth ops: { apiKey: '123' } -> '123'
-    if(authData[authName]) authData = authData[authName];
+    if (authData) {
+      data = (authData[authName]) ? authData[authName] : authData;
+    }
+
+    if(!data) throw new MissingAuthorizationError(authName, auth);
+
     if(auth.type === 'apiKey'){
-      applyApiKey(auth, authName, authData, request);
-    } else if(auth.type === 'basic') {
-      applyBasicAuth(auth, authName, authData.username, authData.password, request);
+      applyApiKey(auth, authName, data, request);
+    } else if(auth.type === 'basic'){
+      applyBasicAuth(auth, authName, data.username, data.password, request);
     }
-  } else {
-    var hasAuth = authNames.some(function(authName){
-      var auth = authMap[authName];
-      var data = authData[authName];
+  });
 
-      if(!data) return false;
-
-      if(auth.type === 'apiKey'){
-        applyApiKey(auth, authName, data, request);
-      } else if(auth.type === 'basic'){
-        applyBasicAuth(auth, authName, data.username, data.password, request);
-      }
-
-      return true;
-    });
-
-    if(!hasAuth){
-      throw new MissingAuthorizationError(authNames.join(', '), authMap);
-    }
-  }
 };
 
 function applyApiKey(auth, authName, apiKey, request){

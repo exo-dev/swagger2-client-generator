@@ -103,31 +103,40 @@ describe('apply auth data', function(){
   });
 
   // TODO: refactor the test to swagger 2.0 security spec and make the code fulfill it
-  // it('can apply multiple auths to a request', function(){
-  //   var operation = {
-  //     security: [{
-  //       basicAuth: {
-  //         type: 'basic',
-  //       },
-  //       apiKeyHeader: {
-  //         type: 'apiKey',
-  //         name: 'headerToken',
-  //         in: 'header'
-  //       },
-  //       apiKeyQuery: {
-  //         type: 'apiKey',
-  //         name: 'queryToken',
-  //         in: 'header'
-  //       }
-  //     }]
-  //   };
+  it('can apply multiple auths to a request', function() {
+    var securityDefinitions = {
+      basicAuth: {
+        type: 'basic',
+      },
+      apiKeyHeader: {
+        type: 'apiKey',
+        name: 'headerToken',
+        in: 'header'
+      },
+      apiKeyQuery: {
+        type: 'apiKey',
+        name: 'queryToken',
+        in: 'query'
+      }
+    };
+    var operation = {
+      security: [{
+        basicAuth: {},
+        apiKeyHeader: {},
+        apiKeyQuery: {}
+      }]
+    };
 
-  //   applyAuthData(operation, {
-  //     basicAuth: {username: 'Bob', password: 'secret' },
-  //     apiKeyQuery: 'query',
-  //     apiKeyHeader: 'header'
-  //   }, request);
+    applyAuthData(operation, securityDefinitions, {
+      basicAuth: {username: 'Bob', password: 'secret' },
+      apiKeyQuery: 'query',
+      apiKeyHeader: 'header'
+    }, request);
 
-  //   expect(request.url).toEqual('http://Bob:secret@example.com?param=value');
-  // });
+    expect(request.url).toEqual('http://Bob:secret@example.com?queryToken=query&param=value');
+    expect(request.headers).toEqual({
+      'Content-Type': 'text/plain',
+      'headerToken': 'header'
+    });
+  });
 });
