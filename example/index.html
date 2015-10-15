@@ -45,6 +45,7 @@
         document.getElementById("inventory").innerHTML = JSON.stringify(JSON.parse(response), null, 2);
       };
 
+      api.auth('123');
       api.store.getInventory({}, responseinventory);
       api.pet.getPetById(id, responsepet);
 

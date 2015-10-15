@@ -8,15 +8,11 @@ describe('get request headers', function(){
 
   beforeEach(function(){
     basicOperation = {
-      apiObject: {
-        apiDeclaration: {
-          basePath: 'http://example.com/api'
-        },
-        path: '/do/it'
-      },
+      basePath: 'http://example.com/api',
+      path: '/do/it',
       parameters: [
         {
-          paramType: 'query',
+          in: 'query',
           type: 'string',
           name: 'queryParam'
         }
@@ -24,12 +20,8 @@ describe('get request headers', function(){
     };
 
     complexOperation = {
-      apiObject: {
-        apiDeclaration: {
-          basePath: 'http://example.com/api'
-        },
-        path: '/do/{what}.{format}'
-      },
+      basePath: 'http://example.com/api',
+      path: '/do/{what}.{format}',
       consumes: [
         'application/json',
         'multipart/form-data',
@@ -39,27 +31,27 @@ describe('get request headers', function(){
       produces: ['application/json'],
       parameters: [
         {
-          paramType: 'path',
+          in: 'path',
           type: 'string',
           name: 'pathParam'
         },
         {
-          paramType: 'form',
+          in: 'formData',
           type: 'string',
           name: 'formParam'
         },
         {
-          paramType: 'body',
+          in: 'body',
           type: 'string',
           name: 'theBody'
         },
         {
-          paramType: 'query',
+          in: 'query',
           type: 'string',
           name: 'queryParam'
         },
         {
-          paramType: 'form',
+          in: 'formData',
           type: 'File',
           name: 'theFile'
         }
@@ -117,15 +109,15 @@ describe('get request headers', function(){
   it('sets the content type to multipart/form-data if there is a file param present', function(){
     var headers = getRequestHeaders(
       complexOperation,
-      { 
+      {
         formParam: 'plain text',
-        theFile: 'plain text' 
+        theFile: 'plain text'
       }
     );
 
     expect(headers['Content-Type']).toBe('multipart/form-data');
   });
-  
+
   it('sets the content type to application/x-www-form-urlencoded if there is a form param present', function(){
     var headers = getRequestHeaders(
       complexOperation,

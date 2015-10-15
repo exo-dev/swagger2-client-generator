@@ -16,7 +16,7 @@ Object.keys(errorTypes).forEach(function(errorName){
   allErrorTypes[errorName] = errorTypes[errorName];
 });
 
-function createOperationHandler(operation, getAuthData, requestHandler){
+function createOperationHandler(operation, schema, getAuthData, requestHandler){
   function Request(data, options){
     this.method = operation.method;
     this.operation = operation;
@@ -25,12 +25,15 @@ function createOperationHandler(operation, getAuthData, requestHandler){
     this.options = options;
   }
 
+  var securityDefinitions = schema.securityDefinitions,
+      definitions = schema.definitions;
+
   var operationHandler = function(data, options){
     var error,
       request;
-    
+
     options = options || {};
-    
+
     if(data == null) data = {};
 
     // if a function is passed in as options, assume it's a callback function
@@ -41,26 +44,25 @@ function createOperationHandler(operation, getAuthData, requestHandler){
 
     try{
       data = prune(data);
-      data = singleParamConvenienceProcessor(operation, data);
+      data = singleParamConvenienceProcessor(operation, data, definitions);
       data = removeUnknownParams(operation, data);
 
-      error = swaggerValidate.operation(data, operation, operation.models);
-      
+      error = swaggerValidate.operation(data, operation, definitions);
       request = new Request(data, options);
-      
+
       // If we know there is an error, don't attempt to craft the request params.
       // The request param generators assume valid data to work properly.
       if(!error){
         request.url = getRequestUrl(operation, data);
         request.headers = getRequestHeaders(operation, data, options);
         request.body = getRequestBody(operation, data, request.headers);
-        
-        applyAuthData(operation, getAuthData(), request);
+
+        applyAuthData(operation, securityDefinitions, getAuthData(), request);
       }
     } catch(e){
       error = e;
     }
-    
+
     return requestHandler(error, request);
   };
 
@@ -70,22 +72,22 @@ function createOperationHandler(operation, getAuthData, requestHandler){
 
   // Useful for reflection
   operationHandler.operation = operation;
-  
+
   operationHandler.getUrl = function(data){
     data = prune(data);
-    data = singleParamConvenienceProcessor(operation, data);
+    data = singleParamConvenienceProcessor(operation, data, definitions);
     data = removeUnknownParams(operation, data);
 
-    var error = swaggerValidate.operation(data, operation, operation.models);
+    var error = swaggerValidate.operation(data, operation, definitions);
     if(error) throw error;
-    
+
     return getRequestUrl(operation, data);
   };
 
 
   // Can be used to preemptively validate without action
   operationHandler.validate = function(data){
-    return swaggerValidate.operation(data, operation, operation.models);
+    return swaggerValidate.operation(data, operation, definitions);
   };
 
   return operationHandler;
@@ -106,7 +108,7 @@ function prune(data){
 }
 
 // Enables data to be passed directly for single param operations.
-function singleParamConvenienceProcessor(operation, data){
+function singleParamConvenienceProcessor(operation, data, definitions){
   // If there are more than one params, bail
   var requiredParams = operation.parameters.filter(function(param){
     return param.required;
@@ -119,21 +121,19 @@ function singleParamConvenienceProcessor(operation, data){
   if(requiredParams.length !== 1 && operation.parameters.length !== 1) return data;
 
   var param = requiredParams[0] || operation.parameters[0];
-  
+
   // If the param is already defined explicitly, bail
   if(typeof data === 'object' &&  data[param.name] !== undefined) return data;
-
-  var models = operation.models;
 
   // If the data passed is is not valid for the param data type, bail
   var error;
 
   try {
-    error = swaggerValidate.dataType(data, param, models); 
+    error = swaggerValidate.dataType(data, param, definitions);
   } catch(e){
     return data;
   }
-  
+
   // If the data passed is a valid param data type, bail
   if(!error){
     var wrapper = {};
@@ -143,7 +143,7 @@ function singleParamConvenienceProcessor(operation, data){
     return data;
   }
 }
- 
+
 
 function removeUnknownParams(operation, data){
   if(!data || typeof data !== 'object') return data;
@@ -157,7 +157,7 @@ function removeUnknownParams(operation, data){
     return !(key in paramNames);
   });
 
-  createOperationHandler.logger.warn('Unknown parameters removed from request:', 
+  createOperationHandler.logger.warn('Unknown parameters removed from request:',
     unknownKeys.join(', '));
 
   unknownKeys.forEach(function(key){

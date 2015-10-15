@@ -10,9 +10,9 @@ InvalidRequestError.prototype.constructor = InvalidRequestError;
 exports.InvalidRequestError = InvalidRequestError;
 
 
-function MissingAuthorizationError(authName, auth){
+function MissingAuthorizationError(requirementNames, auth){
   this.name = 'MissingAuthorizationError';
-  this.message = 'No data found for authorization: ' + authName;
+  this.message = 'Could not fulfill security requirements: ' + requirementNames;
   this.authorization = auth;
 }
 MissingAuthorizationError.prototype = Object.create(InvalidRequestError.prototype);
@@ -35,7 +35,7 @@ function ContentTypeNotSupportedError(contentType, operation){
   var consumes = operation.consumes || [];
 
   this.name = 'ContentTypeNotSupportedError';
-  this.message = 'Operation [' + operation.nickname + '] does not accept ' + contentType + '. It supports: ' + 
+  this.message = 'Operation [' + operation.nickname + '] does not accept ' + contentType + '. It supports: ' +
     consumes.join(', ');
 }
 ContentTypeNotSupportedError.prototype = Object.create(InvalidRequestError.prototype);
@@ -48,7 +48,7 @@ function AcceptsNotSupportedError(accepts, operation){
   var produces = operation.produces || [];
 
   this.name = 'AcceptsNotSupportedError';
-  this.message = 'Operation [' + operation.nickname + '] does not produce ' + accepts + '. It supports: ' + 
+  this.message = 'Operation [' + operation.nickname + '] does not produce ' + accepts + '. It supports: ' +
     produces.join(', ');
 }
 AcceptsNotSupportedError.prototype = Object.create(InvalidRequestError.prototype);

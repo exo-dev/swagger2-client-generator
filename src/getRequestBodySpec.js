@@ -8,15 +8,11 @@ describe('get request body', function(){
 
   beforeEach(function(){
     basicOperation = {
-      apiObject: {
-        apiDeclaration: {
-          basePath: 'http://example.com/api'
-        },
-        path: '/do/it'
-      },
+      basePath: 'http://example.com/api',
+      path: '/do/it',
       parameters: [
         {
-          paramType: 'query',
+          in: 'query',
           type: 'string',
           name: 'queryParam'
         }
@@ -24,12 +20,8 @@ describe('get request body', function(){
     };
 
     complexOperation = {
-      apiObject: {
-        apiDeclaration: {
-          basePath: 'http://example.com/api'
-        },
-        path: '/do/{what}.{format}'
-      },
+      basePath: 'http://example.com/api',
+      path: '/do/{what}.{format}',
       consumes: [
         'application/json',
         'multipart/form-data',
@@ -39,32 +31,32 @@ describe('get request body', function(){
       produces: ['application/json'],
       parameters: [
         {
-          paramType: 'path',
+          in: 'path',
           type: 'string',
           name: 'pathParam'
         },
         {
-          paramType: 'form',
+          in: 'formData',
           type: 'string',
           name: 'formParam'
         },
         {
-          paramType: 'form',
+          in: 'formData',
           type: 'string',
           name: 'otherFormParam'
         },
         {
-          paramType: 'body',
+          in: 'body',
           type: 'string',
           name: 'theBody'
         },
         {
-          paramType: 'query',
+          in: 'query',
           type: 'string',
           name: 'queryParam'
         },
         {
-          paramType: 'form',
+          in: 'formData',
           type: 'File',
           name: 'theFile'
         }
@@ -113,7 +105,7 @@ describe('get request body', function(){
       '\nContent-Disposition: form-data; name="formParam"' +
       '\n' +
       '\nhello' +
-      '\n--SwaggerBoundary{{random}}' + 
+      '\n--SwaggerBoundary{{random}}' +
       '\nContent-Disposition: form-data; name="otherFormParam"' +
       '\n' +
       '\nworld' +
@@ -144,7 +136,7 @@ describe('get request body', function(){
       '\nContent-Disposition: form-data; name="formParam"' +
       '\n' +
       '\nhello' +
-      '\n--SwaggerBoundary{{random}}' + 
+      '\n--SwaggerBoundary{{random}}' +
       '\nContent-Disposition: form-data; name="otherFormParam"' +
       '\n' +
       '\nworld' +

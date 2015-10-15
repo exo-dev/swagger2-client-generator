@@ -8,15 +8,11 @@ describe('get request url', function(){
 
   beforeEach(function(){
     basicOperation = {
-      apiObject: {
-        apiDeclaration: {
-          basePath: 'http://example.com/api'
-        },
-        path: '/do/it'
-      },
+      basePath: 'http://example.com/api',
+      path: '/do/it',
       parameters: [
         {
-          paramType: 'query',
+          in: 'query',
           type: 'string',
           name: 'what'
         }
@@ -24,15 +20,11 @@ describe('get request url', function(){
     };
 
     arrayOperation = {
-      apiObject: {
-        apiDeclaration: {
-          basePath: 'http://example.com/api'
-        },
-        path: '/do/it'
-      },
+      basePath: 'http://example.com/api',
+      path: '/do/it',
       parameters: [
         {
-          paramType: 'query',
+          in: 'query',
           type: 'array',
           name: 'listOfStuff',
           items: {
@@ -43,30 +35,26 @@ describe('get request url', function(){
     };
 
     complexOperation = {
-      apiObject: {
-        apiDeclaration: {
-          basePath: 'http://example.com/api'
-        },
-        path: '/do/{what}.{format}'
-      },
+      basePath: 'http://example.com/api',
+      path: '/do/{what}.{format}',
       parameters: [
         {
-          paramType: 'path',
+          in: 'path',
           type: 'string',
           name: 'what'
         },
         {
-          paramType: 'form',
+          in: 'form',
           type: 'string',
           name: 'notRelevant'
         },
         {
-          paramType: 'query',
+          in: 'query',
           type: 'string',
           name: 'where'
         },
         {
-          paramType: 'query',
+          in: 'query',
           type: 'string',
           name: 'when'
         }
